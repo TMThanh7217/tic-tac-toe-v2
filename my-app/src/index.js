@@ -1,65 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import Board from './components/Board'
 
-function Square(props) {
-    //console.log(`square ${props.isWinLine}`)
-    if (props.isWinLine) {
-        return (
-            <button className="square" style={{backgroundColor: 'green'}} onClick={props.onClick}>
-                {props.value}
-            </button>
-        );
-    }
-    else{
-        return (
-            <button className="square" onClick={props.onClick}>
-                {props.value}
-            </button>
-        );
-    }
-}
-  
-class Board extends React.Component {
-    renderSquare(i) {
-        const winLine = this.props.winLine;
-        //console.log(`board ${this.props.winLine}`)
-        if (winLine && winLine.includes(i)) {
-            return (
-                <Square
-                    key={i} //to remove the warning
-                    value={this.props.squares[i]}
-                    onClick={() => this.props.onClick(i)}
-                    isWinLine='true'
-                />
-            );
-        }
-        else {
-            return (
-                <Square
-                    key={i} //to remove the warning
-                    value={this.props.squares[i]}
-                    onClick={() => this.props.onClick(i)}
-                />
-            );
-        }
-    }
-  
-    render() {
-        let boardLength = Math.sqrt(this.props.squares.length);
-        //console.log(boardLength);
-        let myBoard = [];
-        for (let i = 0; i < boardLength; i++) {
-            let row = [];
-            for (let j = 0; j < boardLength; j++) {
-                row.push(this.renderSquare(i * boardLength + j));
-            }
-            myBoard.push(<div key={i} className='board-row'>{row}</div>); // temp key to remove the warning
-        }
-        return (<div>{myBoard}</div>);
-    }
-}
-  
 class Game extends React.Component {
     constructor(props) {
         super(props);
@@ -69,10 +12,16 @@ class Game extends React.Component {
                 cur_pos: -1,
                 winner: null,
             }],
+            size: 3,
             xIsNext: true,
             stepNumber: 0,
             isAscend: true,
+            okClick: false,
         }
+
+        this.handleClick = this.handleClick.bind(this);
+        this.handleOkClick = this.handleOkClick.bind(this);
+        this.handleChange = this.handleChange.bind(this);
     }
 
     handleClick(i) {
@@ -113,68 +62,104 @@ class Game extends React.Component {
         });
     }
 
-    render() {
-        const history = this.state.history;
-        const current = history[this.state.stepNumber];
-        //const winner = calculateWinner(current.squares);
-        /*console.log(`Game render squares ${current.squares}`);
-        console.log(`Game render cur_pos ${current.cur_pos}`);*/
-        const winner = calculateWinner(current.squares, current.cur_pos) ? calculateWinner(current.squares, current.cur_pos).squares : null ;
-        const winLine = calculateWinner(current.squares, current.cur_pos) ? calculateWinner(current.squares, current.cur_pos).winLine : null ;
-        //console.log(`Game ${winLine}`);
-        //console.log(`Game render winner ${winner}`);
-        //const cur_pos = this.state.cur_pos;
-        
-        const moves = history.map((step, move) => {
-            let cur_pos = step.cur_pos ;
-            let boardLength = Math.sqrt(step.squares.length);
-            let col = cur_pos % boardLength //x = index % cols
-            let row = Math.floor(cur_pos / boardLength) //y = index / cols
-            const isSelected = move === this.state.stepNumber;
-            const desc = move ? 'Go to move #' + move + ` (${col}, ${row})` : 'Go to game start';
-
-            if (isSelected)
-                return (
-                    <li key={move}>
-                        <button style={{fontWeight: 'bold'}} onClick={() => this.jumpTo(move)} >{desc}</button>
-                    </li>
-                )
-            else return (
-                <li key={move}>
-                    <button onClick={() => this.jumpTo(move)} >{desc}</button>
-                </li>
-            );
-        });
-
-        let status;
-        let sortStatus = this.state.isAscend ? 'Ascending' : 'Descending';
-
-        if (winner) {
-            status = 'Winner: ' + winner;
-            current.winner = winner;
-        }
-        else if (!winner && !current.squares.includes(null)) {
-            status = "It's a draw";
-        }
+    handleOkClick(e) {
+        let boardSize = this.state.size;
+        let squares = new Array(boardSize * boardSize).fill(null);
+        //console.log(boardSize);
+        if (boardSize < 3 || boardSize > 5 )
+            alert('Board size must be >= 3 and <= 5');
         else {
-            status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
-        }
+            this.setState({
+                okClick: true,
+                size: boardSize,
+                history: [{
+                    squares: squares,
+                }],
+            });
+            }
+        e.preventDefault();
+    }
 
-        let reverseMoves = moves.slice(); //copy original moves because reverse() mutate the original array
-        reverseMoves = reverseMoves.reverse();
-        let displayMoves = this.state.isAscend ? moves : reverseMoves;
+    handleChange(e) {
+        this.setState({size: e.target.value});
+    }
+
+    render() {
+        if (this.state.okClick) {
+            const history = this.state.history;
+            const current = history[this.state.stepNumber];
+            console.log('in render ' + current.squares.length);
+            //const winner = calculateWinner(current.squares);
+            /*console.log(`Game render squares ${current.squares}`);
+            console.log(`Game render cur_pos ${current.cur_pos}`);*/
+            const winner = calculateWinner(current.squares, current.cur_pos) ? calculateWinner(current.squares, current.cur_pos).squares : null ;
+            const winLine = calculateWinner(current.squares, current.cur_pos) ? calculateWinner(current.squares, current.cur_pos).winLine : null ;
+            //console.log(`Game ${winLine}`);
+            //console.log(`Game render winner ${winner}`);
+            //const cur_pos = this.state.cur_pos;
+            
+            const moves = history.map((step, move) => {
+                let cur_pos = step.cur_pos ;
+                let boardLength = Math.sqrt(step.squares.length);
+                let col = cur_pos % boardLength //x = index % cols
+                let row = Math.floor(cur_pos / boardLength) //y = index / cols
+                const isSelected = move === this.state.stepNumber;
+                const desc = move ? 'Go to move #' + move + ` (${col}, ${row})` : 'Go to game start';
+
+                if (isSelected)
+                    return (
+                        <li key={move}>
+                            <button style={{fontWeight: 'bold'}} onClick={() => this.jumpTo(move)} >{desc}</button>
+                        </li>
+                    )
+                else return (
+                    <li key={move}>
+                        <button onClick={() => this.jumpTo(move)} >{desc}</button>
+                    </li>
+                );
+            });
+
+            let status;
+            let sortStatus = this.state.isAscend ? 'Ascending' : 'Descending';
+
+            if (winner) {
+                status = 'Winner: ' + winner;
+                current.winner = winner;
+            }
+            else if (!winner && !current.squares.includes(null)) {
+                status = "It's a draw";
+            }
+            else {
+                status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+            }
+
+            let reverseMoves = moves.slice(); //copy original moves because reverse() mutate the original array
+            reverseMoves = reverseMoves.reverse();
+            let displayMoves = this.state.isAscend ? moves : reverseMoves;
+                return (
+                    <div className="game">
+                        <div className="game-board">
+                            <Board squares={current.squares} onClick={(i) => this.handleClick(i)} winLine={winLine}/>
+                        </div>
+                        <div className="game-info">
+                            <div>{status}</div>
+                            <ol>{displayMoves}</ol>
+                        </div>
+                        <div>
+                            <button onClick={() => this.handleSortClick()}>Sort moves: {sortStatus}</button>
+                        </div>
+                    </div>
+                )
+        }
 
         return (
             <div className="game">
-                <div className="game-board">
-                    <Board squares={current.squares} onClick={(i) => this.handleClick(i)} winLine={winLine}/>
-                </div>
-                <div className="game-info">
-                    <div>{status}</div>
-                    <ol>{displayMoves}</ol>
-                </div>
                 <div>
-                    <button onClick={() => this.handleSortClick()}>Sort moves: {sortStatus}</button>
+                    <fieldset>
+                        <legend> Enter board size (nxn):</legend>
+                        <input type='number' value={this.state.size} onChange={this.handleChange} ></input>
+                        <button onClick={this.handleOkClick}>Ok</button>
+                    </fieldset>
                 </div>
             </div>
         );
