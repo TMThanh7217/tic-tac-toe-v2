@@ -111,7 +111,7 @@ function calculateWinner(squares, cur_pos) {
     return null;
 }
 
-const Game = (props) => {
+const Game = () => {
     // State Hook
     const [history, setHistory] = useState([{
         squares: Array(9).fill(null),
