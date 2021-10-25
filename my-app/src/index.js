@@ -101,10 +101,12 @@ class Game extends React.Component {
             const moves = history.map((step, move) => {
                 let cur_pos = step.cur_pos ;
                 let boardLength = Math.sqrt(step.squares.length);
-                let col = cur_pos % boardLength //x = index % cols
-                let row = Math.floor(cur_pos / boardLength) //y = index / cols
+                //x = index % cols, y = index / cols
+                let col = cur_pos % boardLength 
+                let row = Math.floor(cur_pos / boardLength)
                 const isSelected = move === this.state.stepNumber;
-                const desc = move ? 'Go to move #' + move + ` (${col}, ${row})` : 'Go to game start';
+                //col, row + 1 because x, y start from 0
+                const desc = move ? 'Go to move #' + move + ` (${col + 1}, ${row + 1})` : 'Go to game start';
 
                 if (isSelected)
                     return (
@@ -175,8 +177,9 @@ ReactDOM.render(
 
 function calculateWinner(squares, cur_pos) {
     let boardLength = Math.sqrt(squares.length);
-    let y = cur_pos % boardLength //x = index % cols
-    let x = Math.floor(cur_pos / boardLength) //y = index / cols
+    //x = index % cols, y = index / cols
+    let y = cur_pos % boardLength 
+    let x = Math.floor(cur_pos / boardLength)
     let cur_val = squares[cur_pos];
     let winLine = Array(boardLength).fill(null);
     /*console.log(`cur val: ${cur_val}`);
