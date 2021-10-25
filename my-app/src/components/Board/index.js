@@ -1,16 +1,15 @@
 import React from 'react';
 import Square from '../Square'
 
-class Board extends React.Component {
-    renderSquare(i) {
-        const winLine = this.props.winLine;
+const Board = ({squares, winLine, onClick}) => {
+    const renderSquare = (i) => {
         //console.log(`board ${this.props.winLine}`)
         if (winLine && winLine.includes(i)) {
             return (
                 <Square
                     key={i} //to remove the warning
-                    value={this.props.squares[i]}
-                    onClick={() => this.props.onClick(i)}
+                    value={squares[i]}
+                    onClick={() => onClick(i)}
                     isWinLine='true'
                 />
             );
@@ -19,26 +18,24 @@ class Board extends React.Component {
             return (
                 <Square
                     key={i} //to remove the warning
-                    value={this.props.squares[i]}
-                    onClick={() => this.props.onClick(i)}
+                    value={squares[i]}
+                    onClick={() => onClick(i)}
                 />
             );
         }
     }
   
-    render() {
-        let boardLength = Math.sqrt(this.props.squares.length);
-        //console.log(boardLength);
-        let myBoard = [];
-        for (let i = 0; i < boardLength; i++) {
-            let row = [];
-            for (let j = 0; j < boardLength; j++) {
-                row.push(this.renderSquare(i * boardLength + j));
-            }
-            myBoard.push(<div key={i} className='board-row'>{row}</div>); // temp key to remove the warning
+    let boardLength = Math.sqrt(squares.length);
+    //console.log(boardLength);
+    let myBoard = [];
+    for (let i = 0; i < boardLength; i++) {
+        let row = [];
+        for (let j = 0; j < boardLength; j++) {
+            row.push(renderSquare(i * boardLength + j));
         }
-        return (<div>{myBoard}</div>);
+        myBoard.push(<div key={i} className='board-row'>{row}</div>); // temp key to remove the warning
     }
+    return (<div>{myBoard}</div>);
 }
 
 export default Board;
